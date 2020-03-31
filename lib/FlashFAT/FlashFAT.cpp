@@ -159,7 +159,7 @@ int FlashFAT::close(){
             // change the mode, should be good to go 
             _mode = NONE; 
             break; 
-        case WRITE:
+        case WRITE: {
             // write the remaining data
             uint32_t temp = 0; 
             // check if erasing is required 
@@ -201,7 +201,8 @@ int FlashFAT::close(){
             #ifdef FLASH_FAT_VERBOSE
                 print_fat_table();
             #endif
-
+            }break;
+        case NONE:
             break; 
     }
     return 0; 
@@ -221,6 +222,13 @@ int FlashFAT::erase_last_file(){
     write_fat_table();
     return _master_table.num_files; 
 }
+
+
+int FlashFAT::get_file_allocation_table(FileAllocationTable *table){
+    // copy over the master table 
+    memcpy(table, &_master_table, sizeof(_master_table)); 
+}
+
 
 int FlashFAT::init(int cs_pin, bool force_init_table){
     // init the flash chip 
@@ -339,8 +347,6 @@ int FlashFAT::wait_until_free(unsigned long timeout){
     }
     return 0; 
 }
-
-
 
 #ifdef FLASH_FAT_DEBUG 
 void FlashFAT::print_error(String message){
